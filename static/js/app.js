@@ -1,38 +1,116 @@
-// create the function that gets the data and creates the plots for the id 
-    // get the data from the json file
-    d3.json("data/samples.json").then((data)=> {
-        //console.log(data)
 
-        // filter sample values by id 
-        var samples = data.samples.filter(s => s.id === '940')[0];
-
-        //console.log(samples);
-
-        // get only top 10 sample values
-        var sampleValues = samples.sample_values.slice(0, 10).reverse();
-
-        // get only top 10 OTU id's
-        var otu_ids = samples.otu_ids.slice(0, 10).map(id => ("OTU " + id)).reverse();
-
-        // get only top 10 OTU labels
-        var otu_labels = samples.otu_labels.slice(0, 10).reverse();
+    // the below function will build both Bar and Bubble charts
+    function buildPlot(subject){
         
-        //console.log(otu_ids);
+        d3.json("data/samples.json").then((data)=> {
+            //console.log(data)
 
-        var trace1 = {
-            x: sampleValues,  
-            y: otu_ids,
-            text: otu_labels,
-            type: 'bar',
-            orientation: 'h'
-        };
+            // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            // Bar Plot
 
-        var bar_data = trace1;
+            // filter sample values by id 
+            var samples = data.samples.filter(s => s.id === subject)[0];
+
+            //console.log(samples);
+
+            // get only top 10 sample values
+            var sampleValues = samples.sample_values.slice(0, 10).reverse();
+
+            // get only top 10 OTU id's
+            var otuIds = samples.otu_ids.slice(0, 10).map(id => ("OTU " + id)).reverse();
+            //console.log(idValues);
+
+            // get only top 10 OTU labels
+            var otuLabels = samples.otu_labels.slice(0, 10).reverse();
+            
+            //console.log(otu_ids);
+
+            var trace1 = {
+                x: sampleValues,  
+                y: otuIds,
+                text: otuLabels,
+                type: 'bar',
+                orientation: 'h'
+            };
+
+            //console.log(trace1);
+
+            var bar_data = [trace1];
+        
+            var bar_layout = {
+                title: "Top 10 OTU's for individual",
+                height: 600,
+                width: 400
+            };
+
+            // create the bar plot
+            Plotly.newPlot("bar", bar_data, bar_layout)
+
+
+            // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            // Bubble Plot
+
+            var otuIds = samples.otu_ids;
+            var sampleValues = samples.sample_values;
+            var otuLabels = samples.otu_labels;
+
+            var trace1 = {
+                x: otuIds,
+                y: sampleValues,
+                mode: "markers",
+                marker: {
+                    size: sampleValues,
+                    color: otuIds,
+                    colorscale: "Earth"
+                },
+                text: otuLabels
+
+            };
+
+            // create the data variable 
+            var bubble_data = [trace1];
+
+            // set the layout for the bubble plot
+            var bubble_layout = {
+                title: "OTU ID",
+                height: 600,
+                width: 1200
+            };
+
+            // create the bubble plot
+            Plotly.newPlot("bubble", bubble_data, bubble_layout);
+            
+        });
+    };
+
     
-        var bar_layout = {
-            title: "Top 10 OTU's for individual",
+    // the below function will show all the names under dropdown
+    // it will append all those names to dropdown
+    // it will also display default Bar and Bubble charts for - 940
+    function init() {
+        var selectSubject = d3.select("#selDataset");
        
-        };
-        Plotly.newPlot("bar", bar_data, bar_layout)
-              
-    });
+        d3.json("data/samples.json").then((data) => {
+            var names = data.names;
+            names.forEach((subject) => {
+                //console.log(subject);
+                selectSubject.append("option").text(subject);
+            });
+
+            // call the functions to display the data and the plots for default id - 940
+            buildPlot(data.names[0]);
+            metadata(data.names[0]);
+            
+        })
+    };
+    
+
+
+    // call the init function to display default Bar, Bubble charts and Demographic Info table for - 940
+    init();
+
+
+
+
+
+    
