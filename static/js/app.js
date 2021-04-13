@@ -84,6 +84,37 @@
     };
 
     
+    // below function will build the Demographic Info table
+    function metadata(subject) {
+        d3.json("data/samples.json").then((data) => {
+            var metadata = data.metadata;
+            var subjectMetadata = metadata.filter(subjects => subjects.id == subject);
+            
+            //console.log(subjectMetadata[0]);
+
+            var subjectResult = subjectMetadata[0];
+
+            var demoTable = d3.select("#sample-metadata");
+    
+            demoTable.html("");
+          
+            Object.entries(subjectResult).forEach(([key, value]) => {
+                demoTable.append("h6").append("b").text(key + ': ' + value); 
+            })
+        })
+    };
+
+
+
+    // the below function will be called once user selects any name from dropdown
+    // It will inturn call child build plot function to display the Bar and Bubble charts
+    function optionChanged(newSubject) {
+        buildPlot(newSubject);
+        metadata(newSubject);
+    };
+
+
+
     // the below function will show all the names under dropdown
     // it will append all those names to dropdown
     // it will also display default Bar and Bubble charts for - 940
@@ -105,7 +136,7 @@
     };
     
 
-
+    
     // call the init function to display default Bar, Bubble charts and Demographic Info table for - 940
     init();
 
